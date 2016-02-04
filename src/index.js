@@ -1,6 +1,7 @@
 var cx = require('classnames');
 var blacklist = require('blacklist');
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 module.exports = React.createClass({
   displayName: 'VideoJS',
@@ -14,7 +15,7 @@ module.exports = React.createClass({
     let source = document.createElement('source');
     video.appendChild(source);
 
-    let attrs = blacklist(this.props, 'children', 'className', 'src', 'type', 'onPlay', 'onPlayerInit', 'options');
+    let attrs = blacklist(this.props, 'children', 'className', 'src', 'type', 'onPlay', 'onPlayerInit', 'onPause', 'options');
     attrs.class = cx(this.props.className, 'videojs', 'video-js vjs-default-skin');
 
     Object.keys(attrs).forEach(key => {
@@ -33,16 +34,31 @@ module.exports = React.createClass({
     let self = this;
 
     videojs(video, this.props.options).ready(function() {
-      self.player = this
-      self.player.on('play', self.handlePlay);
+      self.player = this;
 
-      if(self.props.onPlayerInit) {
-        self.props.onPlayerInit(this.player);
+      if(self.props.onPlay) {
+        self.player.on('play', function() {
+          self.props.onPlay(self.player);
+        });
       }
 
-      self.togglePlatformUI(self.props.type);
+      if(self.props.onPause) {
+        self.player.on('pause', function() {
+          self.props.onPause(self.player);
+        });
+      }
+      
+      if(self.props.onPlayerInit) {
+        self.props.onPlayerInit(self.player);
+      }
+
+      self.togglePlatformUI(self.props);
     });
 
+  },
+
+  shouldComponentUpdate() {
+    return false;
   },
 
   componentWillUnmount() {
@@ -51,34 +67,48 @@ module.exports = React.createClass({
     }
   },
 
-  togglePlatformUI(platform) {
-    // when src changes, restore initial UI
+  togglePlatformUI(props) {
+
     // and adjust based on platform
     this.player.controls(true);
     if (this.player.bigPlayButton) {
       this.player.bigPlayButton.show();
     }
     // disable per platform
-    if (platform === 'video/youtube') {
+    if (props.type === 'video/youtube') {
       // youtube has a mandatory play button
       if (this.player.bigPlayButton) {
         this.player.bigPlayButton.hide();
       }
     }
-    if (platform === 'video/vimeo'){
-      // vimeo has mandatory controls
+    if (props.type === 'video/vimeo'){
+      // vimeo has its own mandatory controls
       this.player.controls(false);
     }
+
+    // manually change DOM elements colors if any defined
+    if (props.options && props.options.color) {
+      let el = ReactDOM.findDOMNode(this);
+      let progress = el.querySelector('.vjs-play-progress');
+      if (progress) {
+          progress.style.backgroundColor = props.options.color;
+      }
+      let volume = el.querySelector('.vjs-volume-level');
+      if (volume) {
+          volume.style.backgroundColor = props.options.color;
+      }
+    }
+
   },
 
   componentWillReceiveProps(nextProps) {
-    if (this.player) {
+    if (this.player && nextProps.src !== this.props.src) {
       this.player.pause();
       this.player.src({
         src: nextProps.src,
         type: nextProps.type
       });
-      this.togglePlatformUI(nextProps.type);
+      this.togglePlatformUI(nextProps);
     }
   },
 
