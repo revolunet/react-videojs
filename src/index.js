@@ -16,7 +16,7 @@ module.exports = React.createClass({
     video.appendChild(source);
 
     let attrs = blacklist(this.props, 'children', 'className', 'src', 'type', 'onPlay', 'onPlayerInit', 'onPause', 'options');
-    attrs.class = cx(this.props.className, 'videojs', 'video-js vjs-default-skin');
+    attrs.class = cx(this.props.className, 'videojs', 'video-js vjs-default-skin vjs-big-play-centered');
 
     Object.keys(attrs).forEach(key => {
       video.setAttribute(key, attrs[key]);
@@ -83,6 +83,10 @@ module.exports = React.createClass({
     }
     if (props.type === 'video/vimeo'){
       // vimeo has its own mandatory controls
+      this.player.controls(false);
+    }
+    if (props.type === 'video/dailymotion'){
+      // dailymotion native controls works ok
       this.player.controls(false);
     }
 
