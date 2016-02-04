@@ -26,8 +26,7 @@ module.exports = React.createClass({
     props.className = cx(this.props.className, 'videojs', 'video-js vjs-default-skin');
 
     assign(props, {
-      ref: 'video',
-      controls: true
+      ref: 'video'
     });
 
     return React.createElement(
