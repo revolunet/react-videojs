@@ -1,9 +1,10 @@
 module.exports = {
-  entry: './example/app.js',
+  entry: './src/index.js',
   output: {
-    path: __dirname + '/example',
-    filename: 'bundle.js',
-    publicPath: "/example/",
+    path: __dirname + '/dist',
+    filename: 'index.js',
+    libraryTarget: 'umd',
+    library: 'ReactVideoJS',
   },
   module: {
     loaders: [
@@ -12,8 +13,8 @@ module.exports = {
     ]
   },
   externals: {
-    'react': 'React',
-    'react-dom': 'ReactDOM'
+    'react': 'react',
+    'react-dom': 'react'
   },
   devtool: "source-map"
 };
