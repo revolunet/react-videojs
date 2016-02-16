@@ -3,19 +3,21 @@ var blacklist = require('blacklist');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+
 module.exports = React.createClass({
   displayName: 'VideoJS',
 
   componentDidMount() {
     // due to the DOM-destructive nature of VideosJS
     // we cant render the video tag directly as react element
-    // so we add this part to the DOM on componentDidMount
-    // this is necessary if VideoJS needs to update its DOM later
+    // in case VideoJS updates this part of the DOM later
+    // so we add it manually to the DOM on componentDidMount
+
     let video = document.createElement('video');
     let source = document.createElement('source');
     video.appendChild(source);
 
-    let attrs = blacklist(this.props, 'children', 'className', 'src', 'type', 'onPlay', 'onPlayerInit', 'onPause', 'options');
+    let attrs = blacklist(this.props, 'children', 'className', 'src', 'type', 'onPlay', 'onPlayerInit', 'onPause', 'options', 'tracks');
     attrs.class = cx(this.props.className, 'videojs', 'video-js vjs-default-skin vjs-big-play-centered');
 
     Object.keys(attrs).forEach(key => {
@@ -26,6 +28,16 @@ module.exports = React.createClass({
       video.setAttribute('data-setup', JSON.stringify(this.props.options));
     }
 
+    // for some reason, html5 video needs initial track elements
+    // this should be updated on componentWillReceiveProps
+    if (this.props.options.tracks && this.props.options.tracks.length) {
+      this.props.options.tracks.forEach(track => {
+        let trackEl = document.createElement('track');
+        Object.keys(track).forEach(key => trackEl.setAttribute(key, track[key]));
+        video.appendChild(trackEl);
+      });
+    }
+
     source.setAttribute('src', this.props.src);
     source.setAttribute('type', this.props.type);
 
@@ -33,7 +45,7 @@ module.exports = React.createClass({
 
     let self = this;
 
-    videojs(video, this.props.options).ready(function() {
+    videojs(video).ready(function() {
       self.player = this;
 
       if(self.props.onPlay) {
@@ -56,6 +68,7 @@ module.exports = React.createClass({
     });
 
   },
+
 
   shouldComponentUpdate() {
     return false;
@@ -116,7 +129,7 @@ module.exports = React.createClass({
     }
   },
 
-  handlePlay: function() {
+  handlePlay() {
     if(this.props.onPlay) this.props.onPlay(this.player);
   },
 
