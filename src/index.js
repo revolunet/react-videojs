@@ -108,13 +108,15 @@ module.exports = React.createClass({
     // manually change DOM elements colors if any defined
     if (props.options && props.options.color) {
       let el = ReactDOM.findDOMNode(this);
-      let progress = el.querySelector('.vjs-play-progress');
-      if (progress) {
-          progress.style.backgroundColor = props.options.color;
-      }
-      let volume = el.querySelector('.vjs-volume-level');
-      if (volume) {
-          volume.style.backgroundColor = props.options.color;
+      if (el) {
+        let progress = el.querySelector('.vjs-play-progress');
+        if (progress) {
+            progress.style.backgroundColor = props.options.color;
+        }
+        let volume = el.querySelector('.vjs-volume-level');
+        if (volume) {
+            volume.style.backgroundColor = props.options.color;
+        }
       }
     }
 
