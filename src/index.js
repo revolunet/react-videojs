@@ -41,7 +41,9 @@ module.exports = React.createClass({
     source.setAttribute('src', this.props.src);
     source.setAttribute('type', this.props.type);
 
-    this.refs.target.appendChild(video);
+    if (this.target) {
+      this.target.appendChild(video);
+    }
 
     let self = this;
 
@@ -59,7 +61,7 @@ module.exports = React.createClass({
           self.props.onPause(self.player);
         });
       }
-      
+
       if(self.props.onPlayerInit) {
         self.props.onPlayerInit(self.player);
       }
@@ -134,7 +136,7 @@ module.exports = React.createClass({
   },
 
   render() {
-    return (<div ref="target"></div>);
+    return (<div ref={ node => this.target = node }></div>);
   }
 
 });
